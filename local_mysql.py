@@ -2,12 +2,13 @@ import pymysql
 
 def save(rows):
     db = pymysql.connect('localhost', 'root', 'root', 'python')
+    db.set_charset('utf8')
     cursor = db.cursor()
-    sql = "insert into province_city2(p_code, code, `name`, `level`) values('%s','%s','%s', '%s')"
+    sql = "insert into province_city2(p_code, code, `name`, `url`, `level`) values('%s','%s','%s', '%s', '%s')"
     for row in rows:
         # 去重
         # if cursor.execute("select count(id) from province_city where code=%s" % row['code']) == 0:
-        cursor.execute(sql % (row['p_code'], row['code'], row['name'], row['level']))
+        cursor.execute(sql % (row['p_code'], row['code'], row['name'], row['url'], row['level']))
     db.commit()
     db.close()
 
