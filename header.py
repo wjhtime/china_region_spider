@@ -1,6 +1,3 @@
-# coding=utf8
-
-
 header = {
     'Host': 'www.stats.gov.cn',
     'Referer': 'http://www.stats.gov.cn/',
