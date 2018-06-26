@@ -6,7 +6,9 @@
 
 
 
-爬取中国城乡数据的爬虫，有请求重试机制，只要执行一行命令即可获取所有省市区，另有采集好的mysql版本数据 [传送门](https://github.com/wjhtime/china_regions)
+爬取中国城乡数据的爬虫，有请求重试机制，只要执行一行命令即可获取所有省市区，另有采集好的mysql版本数据 [传送门](https://github.com/wjhtime/china_regions)。
+
+如果命令行卡住的话不要着急退出，稍等2分钟程序会继续运行。
 
 
 
@@ -22,11 +24,13 @@
 
 
 
+
+
 ## Quick Start
 
-```python
-python3 spider.py
-```
+- 执行建表语句
+- 修改local_mysql.py中的数据库连接配置
+- 命令行执行python3 spider.py
 
 
 
@@ -66,6 +70,13 @@ CREATE TABLE `china_regions` (
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 ```
+
+
+
+## To Do List
+
+- 代码优化
+- 异常处理
 
 
 

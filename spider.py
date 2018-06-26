@@ -2,7 +2,7 @@ import requests
 from lxml import etree
 import os
 import time
-import local_mysql
+from local_mysql import local_mysql
 from requests.adapters import HTTPAdapter
 import header
 
@@ -10,6 +10,7 @@ import header
 def now():
     return time.strftime("%Y-%m-%d %H:%M:%S", time.localtime())
 
+local_mysql = local_mysql()
 
 # 省
 provinces = []
