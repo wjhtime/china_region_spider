@@ -1,13 +1,13 @@
 import pymysql
+from database import db
 
 class local_mysql():
 
-    host = "localhost"
-    user = "root"
-    password = "root"
-    database = "python"
-
     def __init__(self):
+        self.host = db['host']
+        self.user = db['user']
+        self.password = db['password']
+        self.database = db['database']
         pass
 
     def save(self, rows):

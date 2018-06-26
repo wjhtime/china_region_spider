@@ -29,7 +29,7 @@
 ## Quick Start
 
 - 执行建表语句
-- 修改local_mysql.py中的数据库连接配置
+- 修改database.py中的数据库连接配置
 - 命令行执行python3 spider.py
 
 
