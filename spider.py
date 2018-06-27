@@ -5,7 +5,7 @@ import time
 from local_mysql import local_mysql
 from requests.adapters import HTTPAdapter
 import header
-from multiprocessing import Process
+from multiprocessing import Process, cpu_count, Pool
 
 # 打印当前时间
 def now():
@@ -67,11 +67,11 @@ def get_city_process(province):
 
 def get_city():
     provinces = local_mysql.select(1)
+    p = Pool(processes=cpu_count())
     for province in provinces:
-        p = Process(target=get_city_process, args=(province, ))
-        p.start()
-        p.join()
-
+        p.apply_async(get_city_process, args=(province, ))
+    p.close()
+    p.join()
     print('city over ============================')
 
 
@@ -101,10 +101,12 @@ def get_county_process(city):
 
 def get_county():
     cities = local_mysql.select(2)
+    p = Pool(processes=cpu_count())
     for city in cities:
-        p = Process(target=get_county_process, args=(city,))
-        p.start()
-        p.join()
+        p.apply_async(get_county_process, args=(city,))
+    p.close()
+    p.join()
+
 
     print('county over ============================')
 
@@ -134,10 +136,11 @@ def get_town_process(county):
 
 def get_town():
     counties = local_mysql.select(3)
+    p = Pool(cpu_count())
     for county in counties:
-        p = Process(target=get_town_process, args=(county,))
-        p.start()
-        p.join()
+        p.apply_async(get_town_process, args=(county, ))
+    p.close()
+    p.join()
 
     print('town over ============================')
 
@@ -164,10 +167,11 @@ def get_village_process(town):
 
 def get_village():
     towns = local_mysql.select(4)
+    p = Pool(cpu_count())
     for town in towns:
-        p = Process(target=get_village_process, args=(town,))
-        p.start()
-        p.join()
+        p.apply_async(get_village_process, args=(town, ))
+    p.close()
+    p.join()
 
     print('village over ============================')
 
