@@ -73,15 +73,13 @@ CREATE TABLE `china_regions` (
 
 
 
-## More
+## Screenshots
 
-日志截图
+日志
 ![截图](./images/screenshot.jpeg)
 
-数据库截图
+数据库
 ![截图](./images/screenshot2.jpeg)
-
-
 
 
 
@@ -89,6 +87,12 @@ CREATE TABLE `china_regions` (
 
 - 性能优化
 - 去重处理
+
+
+
+## CHANGELOG
+
+[CHANGELOG](https://github.com/wjhtime/china_region_spider/releases)
 
 
 
