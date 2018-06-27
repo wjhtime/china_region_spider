@@ -20,168 +20,174 @@ requests.headers = header.header
 # 重试5次
 requests.mount('http://', HTTPAdapter(max_retries=5))
 
-def get_province():
-    # 省
-    provinces = []
-    response = requests.get(base_url)
-    response.encoding = 'gb2312'
 
-    urls = etree.HTML(response.text).xpath("//tr[@class='provincetr']/td/a/@href")
-    names = etree.HTML(response.text).xpath("//tr[@class='provincetr']/td/a/text()")
+class province():
 
-    for i in range(len(urls)):
-        p_code = 0
-        name = names[i]
-        code = os.path.splitext(urls[i])[0]
-        url = base_url + urls[i]
-        item = {'p_code': p_code, 'url': url, 'code': code, 'name': name, 'level': 1}
-        provinces.append(item)
-        print(name, code, url, 1, now())
+    def __init__(self):
+        pass
 
-    local_mysql.save(provinces)
-    del provinces
-    print('province over ============================')
+    def crawler(self):
+        # 省
+        provinces = []
+        response = requests.get(base_url)
+        response.encoding = 'gb2312'
 
+        urls = etree.HTML(response.text).xpath("//tr[@class='provincetr']/td/a/@href")
+        names = etree.HTML(response.text).xpath("//tr[@class='provincetr']/td/a/text()")
 
+        for i in range(len(urls)):
+            p_code = 0
+            name = names[i]
+            code = os.path.splitext(urls[i])[0]
+            url = base_url + urls[i]
+            item = {'p_code': p_code, 'url': url, 'code': code, 'name': name, 'level': 1}
+            provinces.append(item)
+            print(name, code, url, 1, now())
 
-def get_city_process(province):
-    cities = []
-    response = requests.get(province[4])
-    response.encoding = 'gb2312'
-
-    base_url = os.path.dirname(province[4]) + '/'
-    codes = etree.HTML(response.text).xpath("//tr[@class='citytr']/td[1]/a/text()")
-    names = etree.HTML(response.text).xpath("//tr[@class='citytr']/td[2]/a/text()")
-    urls = etree.HTML(response.text).xpath("//tr[@class='citytr']/td[1]/a/@href")
-
-    for i in range(len(codes)):
-        p_code = province[2]
-        url = base_url + urls[i]
-        code = codes[i]
-        name = names[i]
-        item = {'p_code': p_code, 'url': url, 'code': code, 'name': name, 'level': 2}
-        cities.append(item)
-        print(name, code, url, 2, now())
-    local_mysql.save(cities)
-    del cities
-
-def get_city():
-    provinces = local_mysql.select(1)
-    p = Pool(processes=cpu_count())
-    for province in provinces:
-        p.apply_async(get_city_process, args=(province, ))
-    p.close()
-    p.join()
-    print('city over ============================')
+        local_mysql.save(provinces)
+        del provinces
+        print('province over ============================')
 
 
 
+class city():
+
+    def crawler(self):
+        provinces = local_mysql.select(1)
+        p = Pool(processes=cpu_count())
+        for province in provinces:
+            p.apply_async(self.process, args=(province,))
+        p.close()
+        p.join()
+        print('city over ============================')
+
+    def process(self, province):
+        cities = []
+        response = requests.get(province[4])
+        response.encoding = 'gb2312'
+
+        base_url = os.path.dirname(province[4]) + '/'
+        codes = etree.HTML(response.text).xpath("//tr[@class='citytr']/td[1]/a/text()")
+        names = etree.HTML(response.text).xpath("//tr[@class='citytr']/td[2]/a/text()")
+        urls = etree.HTML(response.text).xpath("//tr[@class='citytr']/td[1]/a/@href")
+
+        for i in range(len(codes)):
+            p_code = province[2]
+            url = base_url + urls[i]
+            code = codes[i]
+            name = names[i]
+            item = {'p_code': p_code, 'url': url, 'code': code, 'name': name, 'level': 2}
+            cities.append(item)
+            print(name, code, url, 2, now())
+        local_mysql.save(cities)
+        del cities
 
 
-def get_county_process(city):
-    counties = []
-    counties_res = requests.get(city[4])
-    counties_res.encoding = 'gb2312'
-    base_url = os.path.dirname(city[4]) + '/'
+class county():
 
-    codes = etree.HTML(counties_res.text).xpath("//tr[@class='countytr']/td[1]/a/text()")
-    names = etree.HTML(counties_res.text).xpath("//tr[@class='countytr']/td[2]/a/text()")
-    urls = etree.HTML(counties_res.text).xpath("//tr[@class='countytr']/td[1]/a/@href")
+    def process(self, city):
+        counties = []
+        counties_res = requests.get(city[4])
+        counties_res.encoding = 'gb2312'
+        base_url = os.path.dirname(city[4]) + '/'
 
-    for i in range(len(codes)):
-        p_code = city[2]
-        url = base_url + urls[i]
-        code = codes[i]
-        name = names[i]
-        item = {'p_code': p_code, 'url': url, 'code': code, 'name': name, 'level': 3}
-        counties.append(item)
-        print(name, code, url, 3, now())
-    local_mysql.save(counties)
-    del counties
+        codes = etree.HTML(counties_res.text).xpath("//tr[@class='countytr']/td[1]/a/text()")
+        names = etree.HTML(counties_res.text).xpath("//tr[@class='countytr']/td[2]/a/text()")
+        urls = etree.HTML(counties_res.text).xpath("//tr[@class='countytr']/td[1]/a/@href")
 
-def get_county():
-    cities = local_mysql.select(2)
-    p = Pool(processes=cpu_count())
-    for city in cities:
-        p.apply_async(get_county_process, args=(city,))
-    p.close()
-    p.join()
+        for i in range(len(codes)):
+            p_code = city[2]
+            url = base_url + urls[i]
+            code = codes[i]
+            name = names[i]
+            item = {'p_code': p_code, 'url': url, 'code': code, 'name': name, 'level': 3}
+            counties.append(item)
+            print(name, code, url, 3, now())
+        local_mysql.save(counties)
+        del counties
 
+    def crawler(self):
+        cities = local_mysql.select(2)
+        p = Pool(processes=cpu_count())
+        for city in cities:
+            p.apply_async(self.process, args=(city,))
+        p.close()
+        p.join()
 
-    print('county over ============================')
-
-
-
-def get_town_process(county):
-    towns = []
-    town_res = requests.get(county[4])
-    town_res.encoding = 'gb2312'
-    base_url = os.path.dirname(county[4]) + '/'
-
-    codes = etree.HTML(town_res.text).xpath("//tr[@class='towntr']/td[1]/a/text()")
-    names = etree.HTML(town_res.text).xpath("//tr[@class='towntr']/td[2]/a/text()")
-    urls = etree.HTML(town_res.text).xpath("//tr[@class='towntr']/td[1]/a/@href")
-
-    for i in range(len(codes)):
-        p_code = county[2]
-        url = base_url + urls[i]
-        code = codes[i]
-        name = names[i]
-        item = {'p_code': p_code, 'url': url, 'code': code, 'name': name, 'level': 4}
-        towns.append(item)
-        print(name, code, url, 4, now())
-    local_mysql.save(towns)
-    del towns
+        print('county over ============================')
 
 
-def get_town():
-    counties = local_mysql.select(3)
-    p = Pool(cpu_count())
-    for county in counties:
-        p.apply_async(get_town_process, args=(county, ))
-    p.close()
-    p.join()
+class town():
+    def process(self, county):
+        towns = []
+        town_res = requests.get(county[4])
+        town_res.encoding = 'gb2312'
+        base_url = os.path.dirname(county[4]) + '/'
 
-    print('town over ============================')
+        codes = etree.HTML(town_res.text).xpath("//tr[@class='towntr']/td[1]/a/text()")
+        names = etree.HTML(town_res.text).xpath("//tr[@class='towntr']/td[2]/a/text()")
+        urls = etree.HTML(town_res.text).xpath("//tr[@class='towntr']/td[1]/a/@href")
+
+        for i in range(len(codes)):
+            p_code = county[2]
+            url = base_url + urls[i]
+            code = codes[i]
+            name = names[i]
+            item = {'p_code': p_code, 'url': url, 'code': code, 'name': name, 'level': 4}
+            towns.append(item)
+            print(name, code, url, 4, now())
+        local_mysql.save(towns)
+        del towns
+
+
+    def crawler(self):
+        counties = local_mysql.select(3)
+        p = Pool(cpu_count())
+        for county in counties:
+            p.apply_async(self.process, args=(county, ))
+        p.close()
+        p.join()
+
+        print('town over ============================')
 
 
 
+class village():
+    def process(self, town):
+        villages = []
+        village_res = requests.get(town[4])
+        village_res.encoding = 'gb2312'
 
-def get_village_process(town):
-    villages = []
-    village_res = requests.get(town[4])
-    village_res.encoding = 'gb2312'
+        codes = etree.HTML(village_res.text).xpath("//tr[@class='villagetr']/td[1]/text()")
+        names = etree.HTML(village_res.text).xpath("//tr[@class='villagetr']/td[3]/text()")
 
-    codes = etree.HTML(village_res.text).xpath("//tr[@class='villagetr']/td[1]/text()")
-    names = etree.HTML(village_res.text).xpath("//tr[@class='villagetr']/td[3]/text()")
+        for i in range(len(codes)):
+            p_code = town[2]
+            code = codes[i]
+            name = names[i]
+            item = {'p_code': p_code, 'code': code, 'name': name, 'level': 5, 'url': ''}
+            villages.append(item)
+            print(name, code, 5, now())
+        local_mysql.save(villages)
+        del villages
 
-    for i in range(len(codes)):
-        p_code = town[2]
-        code = codes[i]
-        name = names[i]
-        item = {'p_code': p_code, 'code': code, 'name': name, 'level': 5, 'url': ''}
-        villages.append(item)
-        print(name, code, 5, now())
-    local_mysql.save(villages)
-    del villages
+    def crawler(self):
+        towns = local_mysql.select(4)
+        p = Pool(cpu_count())
+        for town in towns:
+            p.apply_async(self.process, args=(town, ))
+        p.close()
+        p.join()
 
-def get_village():
-    towns = local_mysql.select(4)
-    p = Pool(cpu_count())
-    for town in towns:
-        p.apply_async(get_village_process, args=(town, ))
-    p.close()
-    p.join()
-
-    print('village over ============================')
+        print('village over ============================')
 
 
 def main():
-    get_province()
-    get_city()
-    get_county()
-    get_town()
-    get_village()
+    province().crawler()
+    city().crawler()
+    county().crawler()
+    town().crawler()
+    village().crawler()
     pass
 
 if __name__ == '__main__':

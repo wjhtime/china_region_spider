@@ -16,8 +16,8 @@ class local_mysql():
         sql = "insert into china_regions(p_code, code, `name`, `url`, `level`) values('%s','%s','%s', '%s', '%s')"
         for row in rows:
             # 去重
-            # if cursor.execute("select count(id) from province_city where code=%s" % row['code']) == 0:
-            cursor.execute(sql % (row['p_code'], row['code'], row['name'], row['url'], row['level']))
+            # if cursor.execute("select count(id) from china_regions where code=%s" % row['code']) == 0:
+                cursor.execute(sql % (row['p_code'], row['code'], row['name'], row['url'], row['level']))
         self.db.commit()
 
 

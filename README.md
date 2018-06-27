@@ -87,8 +87,8 @@ CREATE TABLE `china_regions` (
 
 ## To Do List
 
-- 代码优化
-- 异常处理
+- 性能优化
+- 去重处理
 
 
 
