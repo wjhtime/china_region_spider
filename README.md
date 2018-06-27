@@ -76,10 +76,10 @@ CREATE TABLE `china_regions` (
 ## More
 
 日志截图
-![截图](./images/screenshot.png)
+![截图](./images/screenshot.jpeg)
 
 数据库截图
-![截图](./images/screenshot2.png)
+![截图](./images/screenshot2.jpeg)
 
 
 
