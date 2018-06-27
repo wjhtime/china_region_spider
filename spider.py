@@ -5,6 +5,7 @@ import time
 from local_mysql import local_mysql
 from requests.adapters import HTTPAdapter
 import header
+from multiprocessing import Process
 
 # 打印当前时间
 def now():
@@ -38,107 +39,135 @@ def get_province():
         print(name, code, url, 1, now())
 
     local_mysql.save(provinces)
-
+    del provinces
     print('province over ============================')
 
 
+
+def get_city_process(province):
+    cities = []
+    response = requests.get(province[4])
+    response.encoding = 'gb2312'
+
+    base_url = os.path.dirname(province[4]) + '/'
+    codes = etree.HTML(response.text).xpath("//tr[@class='citytr']/td[1]/a/text()")
+    names = etree.HTML(response.text).xpath("//tr[@class='citytr']/td[2]/a/text()")
+    urls = etree.HTML(response.text).xpath("//tr[@class='citytr']/td[1]/a/@href")
+
+    for i in range(len(codes)):
+        p_code = province[2]
+        url = base_url + urls[i]
+        code = codes[i]
+        name = names[i]
+        item = {'p_code': p_code, 'url': url, 'code': code, 'name': name, 'level': 2}
+        cities.append(item)
+        print(name, code, url, 2, now())
+    local_mysql.save(cities)
+    del cities
+
 def get_city():
     provinces = local_mysql.select(1)
-
     for province in provinces:
-        cities = []
-        response = requests.get(province[4])
-        response.encoding = 'gb2312'
-
-        base_url = os.path.dirname(province[4]) + '/'
-        codes = etree.HTML(response.text).xpath("//tr[@class='citytr']/td[1]/a/text()")
-        names = etree.HTML(response.text).xpath("//tr[@class='citytr']/td[2]/a/text()")
-        urls = etree.HTML(response.text).xpath("//tr[@class='citytr']/td[1]/a/@href")
-
-        for i in range(len(codes)):
-            p_code = province[2]
-            url = base_url + urls[i]
-            code = codes[i]
-            name = names[i]
-            item = {'p_code': p_code, 'url': url, 'code': code, 'name': name, 'level': 2}
-            cities.append(item)
-            print(name, code, url, 2, now())
-        local_mysql.save(cities)
+        p = Process(target=get_city_process, args=(province, ))
+        p.start()
+        p.join()
 
     print('city over ============================')
 
 
+
+
+
+def get_county_process(city):
+    counties = []
+    counties_res = requests.get(city[4])
+    counties_res.encoding = 'gb2312'
+    base_url = os.path.dirname(city[4]) + '/'
+
+    codes = etree.HTML(counties_res.text).xpath("//tr[@class='countytr']/td[1]/a/text()")
+    names = etree.HTML(counties_res.text).xpath("//tr[@class='countytr']/td[2]/a/text()")
+    urls = etree.HTML(counties_res.text).xpath("//tr[@class='countytr']/td[1]/a/@href")
+
+    for i in range(len(codes)):
+        p_code = city[2]
+        url = base_url + urls[i]
+        code = codes[i]
+        name = names[i]
+        item = {'p_code': p_code, 'url': url, 'code': code, 'name': name, 'level': 3}
+        counties.append(item)
+        print(name, code, url, 3, now())
+    local_mysql.save(counties)
+    del counties
+
 def get_county():
     cities = local_mysql.select(2)
-
     for city in cities:
-        counties = []
-        counties_res = requests.get(city[4])
-        counties_res.encoding = 'gb2312'
-        base_url = os.path.dirname(city[4]) + '/'
-
-        codes = etree.HTML(counties_res.text).xpath("//tr[@class='countytr']/td[1]/a/text()")
-        names = etree.HTML(counties_res.text).xpath("//tr[@class='countytr']/td[2]/a/text()")
-        urls = etree.HTML(counties_res.text).xpath("//tr[@class='countytr']/td[1]/a/@href")
-
-        for i in range(len(codes)):
-            p_code = city[2]
-            url = base_url + urls[i]
-            code = codes[i]
-            name = names[i]
-            item = {'p_code': p_code, 'url': url, 'code': code, 'name': name, 'level': 3}
-            counties.append(item)
-            print(name, code, url, 3, now())
-        local_mysql.save(counties)
+        p = Process(target=get_county_process, args=(city,))
+        p.start()
+        p.join()
 
     print('county over ============================')
 
 
+
+def get_town_process(county):
+    towns = []
+    town_res = requests.get(county[4])
+    town_res.encoding = 'gb2312'
+    base_url = os.path.dirname(county[4]) + '/'
+
+    codes = etree.HTML(town_res.text).xpath("//tr[@class='towntr']/td[1]/a/text()")
+    names = etree.HTML(town_res.text).xpath("//tr[@class='towntr']/td[2]/a/text()")
+    urls = etree.HTML(town_res.text).xpath("//tr[@class='towntr']/td[1]/a/@href")
+
+    for i in range(len(codes)):
+        p_code = county[2]
+        url = base_url + urls[i]
+        code = codes[i]
+        name = names[i]
+        item = {'p_code': p_code, 'url': url, 'code': code, 'name': name, 'level': 4}
+        towns.append(item)
+        print(name, code, url, 4, now())
+    local_mysql.save(towns)
+    del towns
+
+
 def get_town():
     counties = local_mysql.select(3)
-
     for county in counties:
-        towns = []
-        town_res = requests.get(county[4])
-        town_res.encoding = 'gb2312'
-        base_url = os.path.dirname(county[4]) + '/'
-
-        codes = etree.HTML(town_res.text).xpath("//tr[@class='towntr']/td[1]/a/text()")
-        names = etree.HTML(town_res.text).xpath("//tr[@class='towntr']/td[2]/a/text()")
-        urls = etree.HTML(town_res.text).xpath("//tr[@class='towntr']/td[1]/a/@href")
-
-        for i in range(len(codes)):
-            p_code = county[2]
-            url = base_url + urls[i]
-            code = codes[i]
-            name = names[i]
-            item = {'p_code': p_code, 'url': url, 'code': code, 'name': name, 'level': 4}
-            towns.append(item)
-            print(name, code, url, 4, now())
-        local_mysql.save(towns)
+        p = Process(target=get_town_process, args=(county,))
+        p.start()
+        p.join()
 
     print('town over ============================')
 
 
+
+
+def get_village_process(town):
+    villages = []
+    village_res = requests.get(town[4])
+    village_res.encoding = 'gb2312'
+
+    codes = etree.HTML(village_res.text).xpath("//tr[@class='villagetr']/td[1]/text()")
+    names = etree.HTML(village_res.text).xpath("//tr[@class='villagetr']/td[3]/text()")
+
+    for i in range(len(codes)):
+        p_code = town[2]
+        code = codes[i]
+        name = names[i]
+        item = {'p_code': p_code, 'code': code, 'name': name, 'level': 5, 'url': ''}
+        villages.append(item)
+        print(name, code, 5, now())
+    local_mysql.save(villages)
+    del villages
+
 def get_village():
     towns = local_mysql.select(4)
-
     for town in towns:
-        villages = []
-        village_res = requests.get(town[4])
-        village_res.encoding = 'gb2312'
-
-        codes = etree.HTML(village_res.text).xpath("//tr[@class='villagetr']/td[1]/text()")
-        names = etree.HTML(village_res.text).xpath("//tr[@class='villagetr']/td[3]/text()")
-
-        for i in range(len(codes)):
-            p_code = town[2]
-            code = codes[i]
-            name = names[i]
-            item = {'p_code': p_code, 'code': code, 'name': name, 'level': 5, 'url': ''}
-            villages.append(item)
-            print(name, code, 5, now())
-        local_mysql.save(villages)
+        p = Process(target=get_village_process, args=(town,))
+        p.start()
+        p.join()
 
     print('village over ============================')
 
