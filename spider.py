@@ -183,12 +183,13 @@ class village():
 
 
 def main():
+    start = time.time()
     province().crawler()
     city().crawler()
     county().crawler()
     town().crawler()
-    village().crawler()
-    pass
+    # village().crawler()
+    print("共耗时{0}s". format(time.time() - start))
 
 if __name__ == '__main__':
     main()
