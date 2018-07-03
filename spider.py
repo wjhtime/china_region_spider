@@ -188,7 +188,7 @@ def main():
     city().crawler()
     county().crawler()
     town().crawler()
-    village().crawler() 
+    village().crawler()
     print("共耗时{0}s". format(time.time() - start))
 
 if __name__ == '__main__':
